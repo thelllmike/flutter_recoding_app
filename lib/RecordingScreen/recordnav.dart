@@ -5,8 +5,9 @@ import 'package:voice_recording_app/RecordingScreen/recordingu.dart';
 
 
 
-class recodnav extends StatelessWidget {
-  const recodnav({super.key});
+// ignore: camel_case_types
+class NavigationScreen extends StatelessWidget {
+    const NavigationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

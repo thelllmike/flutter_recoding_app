@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:voice_recording_app/your%20screen/login.dart';
 
 import 'dashboard.dart';
 
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home:  Dashboard(),
+      home:  Loginpage(),
     );
   }
 }

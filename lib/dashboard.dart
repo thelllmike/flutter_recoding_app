@@ -97,7 +97,7 @@ class Dashboard extends StatelessWidget {
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                  PatientDetails())); //Recording //PatientDetails
+                                                  NavigationScreen())); //Recording //PatientDetails
                                     },
                                     child: const Text(
                                       "Search Patient Details",
@@ -118,49 +118,47 @@ class Dashboard extends StatelessWidget {
                      SizedBox(
                       width: 190.0,
                       height: 190.0,
-                      child: GestureDetector(
-                        onTap: (){Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                const RecordingScreen() )); },
-                        child: Card(
-                          color: Color.fromARGB(255, 47, 141, 218),
-                          elevation: 2.0,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0)),
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset("assets/research.png", width: 64.0),
-                                  const SizedBox(height: 10.0),
-                                  TextButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const recodnav() )); //Recording //PatientDetails
-                                      },
-                                      child: const Text(
-                                        "Recording",
-                                        style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20.0),
-                                      )),
-                                ],
-                              ),
+                      child: Card(
+                        color: Color.fromARGB(255, 32, 101, 157),
+                        elevation: 2.0,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0)),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset("assets/research.png", width: 64.0),
+                                const SizedBox(height: 10.0),
+                                TextButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PatientDetails())); //Recording //PatientDetails
+                                    },
+                                    child: const Text(
+                                      "Search Patient Details",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20.0),
+                                    )),
+                              ],
                             ),
                           ),
                         ),
                       ),
                     ),
+                   
 
+                   
+
+                  
                   ],
                 ),
               ),

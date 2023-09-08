@@ -34,32 +34,107 @@ class _recordinguState extends State<recordingu> {
     audioPlayer.dispose();
   }
 
-  Future<void> startRecording() async {
+    Future<String?> getApplicationSupportDirectoryPath() async {
     try {
-      if (await audioRecord.hasPermission()) {
-        await audioRecord.start();
-        setState(() {
-          isRecording = true;
-        });
-      }
-    } catch (e, stackTrace) {
-      print('Error Start Recording::::::: $e');
-      print('Stack Trace:::::::>>>>>>> $stackTrace');
+      final appSupportDir = await path_provider.getApplicationSupportDirectory();
+      return appSupportDir.path;
+    } catch (e) {
+      print('Error getting application support directory path: $e');
+      return null;
     }
   }
 
-  Future<void> stopRecording() async {
-    try {
-      String? path = await audioRecord.stop();
-      setState(() {
-        isRecording = false;
-        audioPath = path!;
-        voiceRecordingsBox.add(audioPath);
-      });
-    } catch (e) {
-      print('Error stop Recording $e');
+
+  Future<void> startRecording() async {
+  try {
+    if (await audioRecord.hasPermission()) {
+      final appSupportDirPath = await getApplicationSupportDirectoryPath();
+      if (appSupportDirPath != null) {
+        // Create a new folder for recordings
+        final recordingsDirPath = '$appSupportDirPath/recordings';
+        final customPath = '$recordingsDirPath/custom_audio_file.wav';
+
+        // Check if the recordings directory exists, if not, create it
+        final recordingsDir = Directory(recordingsDirPath);
+        if (!await recordingsDir.exists()) {
+          await recordingsDir.create(recursive: true);
+        }
+
+        await audioRecord.start(path: customPath);
+        setState(() {
+          isRecording = true;
+          audioPath = customPath;
+        });
+      } else {
+        print('Error: Application support directory path is null.');
+      }
     }
+  } catch (e, stackTrace) {
+    print('Error Start Recording::::::: $e');
+    print('Stack Trace:::::::>>>>>>> $stackTrace');
   }
+}
+
+
+
+// Future<void> startRecording() async {
+//     try {
+//       if (await audioRecord.hasPermission()) {
+//         final appSupportDirPath = await getApplicationSupportDirectoryPath();
+//         if (appSupportDirPath != null) {
+//           final customPath = '$appSupportDirPath/custom_audio_file.wav'; // Change the file name and extension as needed
+//           await audioRecord.start(path: customPath);
+//           setState(() {
+//             isRecording = true;
+//             audioPath = customPath;
+//           });
+//         } else {
+//           print('Error: Application support directory path is null.');
+//         }
+//       }
+//     } catch (e, stackTrace) {
+//       print('Error Start Recording::::::: $e');
+//       print('Stack Trace:::::::>>>>>>> $stackTrace');
+//     }
+//   }
+
+
+  // Future<void> startRecording() async {
+  //   try {
+  //     if (await audioRecord.hasPermission()) {
+  //       await audioRecord.start();
+  //       setState(() {
+  //         isRecording = true;
+  //       });
+  //     }
+  //   } catch (e, stackTrace) {
+  //     print('Error Start Recording::::::: $e');
+  //     print('Stack Trace:::::::>>>>>>> $stackTrace');
+  //   }
+  // }
+
+
+ Future<void> stopRecording() async {
+  try {
+    String? path = await audioRecord.stop();
+
+    // Save with a name starting with 'audio'
+    final directory = await path_provider.getApplicationDocumentsDirectory();
+    final DateTime now = DateTime.now();
+    final String newFileName = 'record_${now.toIso8601String()}.aac';
+    final newPath = '${directory.path}/$newFileName';
+
+    File(path!).renameSync(newPath);
+
+    setState(() {
+      isRecording = false;
+      audioPath = newPath;
+      voiceRecordingsBox.add(audioPath);
+    });
+  } catch (e) {
+    print('Error stop Recording $e');
+  }
+}
 
   // Future<void> playRecording({required String  audioPath1}) async {
   //   try {
@@ -73,7 +148,9 @@ class _recordinguState extends State<recordingu> {
 
   @override
   Widget build(BuildContext context) {
-    final voiceRecordings = voiceRecordingsBox.values.cast<String>().toList();
+    final voiceRecordings = voiceRecordingsBox.values.cast<String>()
+    .where((path) => path.contains('/record_')) // Filter paths that contain 'audio_'
+    .toList();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Voice Recorder'),

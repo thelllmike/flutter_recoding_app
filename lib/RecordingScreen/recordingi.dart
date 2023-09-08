@@ -7,7 +7,7 @@ import 'package:path_provider/path_provider.dart' as path_provider;
 
 
 class recordingi extends StatefulWidget {
-  const recordingi({super.key});
+  // const recordingi({super.key});
 
   @override
   State<recordingi> createState() => _recordingiState();
@@ -48,22 +48,33 @@ final voiceRecordingsBox = Hive.box('voiceRecordingsBox');
     }
   }
 
-  Future<void> stopRecording() async {
-    try {
-      String? path = await audioRecord.stop();
-      setState(() {
-        isRecording = false;
-        audioPath = path!;
-        voiceRecordingsBox.add(audioPath);
-      });
-    } catch (e) {
-      print('Error stop Recording $e');
-    }
+ Future<void> stopRecording() async {
+  try {
+    String? path = await audioRecord.stop();
+
+    // Save with a name starting with 'audio'
+    final directory = await path_provider.getApplicationDocumentsDirectory();
+    final DateTime now = DateTime.now();
+    final String newFileName = 'audio_${now.toIso8601String()}.aac';
+    final newPath = '${directory.path}/$newFileName';
+
+    File(path!).renameSync(newPath);
+
+    setState(() {
+      isRecording = false;
+      audioPath = newPath;
+      voiceRecordingsBox.add(audioPath);
+    });
+  } catch (e) {
+    print('Error stop Recording $e');
   }
+}
 
    @override
-  Widget build(BuildContext context) {
-    final voiceRecordings = voiceRecordingsBox.values.cast<String>().toList();
+ Widget build(BuildContext context) {
+  final voiceRecordings = voiceRecordingsBox.values.cast<String>()
+    .where((path) => path.contains('/audio_')) // Filter paths that contain 'audio_'
+    .toList();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Voice Recorder'),

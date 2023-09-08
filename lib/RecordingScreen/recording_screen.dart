@@ -7,7 +7,7 @@ import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 
 class RecordingScreen extends StatefulWidget {
-  const RecordingScreen({super.key});
+  // const RecordingScreen({super.key});
 
   @override
   _RecordingScreenState createState() => _RecordingScreenState();
@@ -49,31 +49,32 @@ class _RecordingScreenState extends State<RecordingScreen> {
   }
 
   Future<void> stopRecording() async {
-    try {
-      String? path = await audioRecord.stop();
-      setState(() {
-        isRecording = false;
-        audioPath = path!;
-        voiceRecordingsBox.add(audioPath);
-      });
-    } catch (e) {
-      print('Error stop Recording $e');
-    }
-  }
+  try {
+    String? path = await audioRecord.stop();
 
-  // Future<void> playRecording({required String  audioPath1}) async {
-  //   try {
-  //     Source urlSource = UrlSource(audioPath1);
-  //     await audioPlayer.play(urlSource);
-  //     //print('Hive Playing Recording ${voiceRecordingsBox.values.cast<String>().toList().toString()}');
-  //   } catch (e) {
-  //     print('Error Playing Recording $e');
-  //   }
-  // }
+    // Save with a name starting with 'audio'
+    final directory = await path_provider.getApplicationDocumentsDirectory();
+    final DateTime now = DateTime.now();
+    final String newFileName = 'speak_${now.toIso8601String()}.aac';
+    final newPath = '${directory.path}/$newFileName';
+
+    File(path!).renameSync(newPath);
+
+    setState(() {
+      isRecording = false;
+      audioPath = newPath;
+      voiceRecordingsBox.add(audioPath);
+    });
+  } catch (e) {
+    print('Error stop Recording $e');
+  }
+}
 
   @override
   Widget build(BuildContext context) {
-    final voiceRecordings = voiceRecordingsBox.values.cast<String>().toList();
+      final voiceRecordings = voiceRecordingsBox.values.cast<String>()
+    .where((path) => path.contains('/speak_')) // Filter paths that contain 'audio_'
+    .toList();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Voice Recorder'),
