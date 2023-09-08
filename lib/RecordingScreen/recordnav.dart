@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:voice_recording_app/RecordingScreen/allrecord.dart';
 import 'package:voice_recording_app/RecordingScreen/recording_screen.dart';
 import 'package:voice_recording_app/RecordingScreen/recordingi.dart';
 import 'package:voice_recording_app/RecordingScreen/recordingu.dart';
@@ -122,6 +123,35 @@ Column(
         ),
       ),
     ),
+
+     const SizedBox(
+              height: 20,
+            ),
+    ElevatedButton(
+      onPressed: () {
+        // Navigate to the RecordingScreen
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => Recordingallscreen()),
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        primary: const Color(0xff0095ff),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
+      ),
+      child: const Text(
+        'All Recording',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
+      ),
+    ),
+
   ],
 ),
 

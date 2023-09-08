@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:voice_recording_app/RecordingScreen/recordnav.dart';
+import 'package:voice_recording_app/dashboard.dart';
 
 class RecordingScreen extends StatefulWidget {
   // const RecordingScreen({super.key});
@@ -19,6 +21,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
   late AudioPlayer audioPlayer;
   bool isRecording = false;
   String audioPath = " ";
+  int recordingCount = 0;
+
 
   @override
   void initState() {
@@ -34,7 +38,8 @@ class _RecordingScreenState extends State<RecordingScreen> {
     audioPlayer.dispose();
   }
 
-  Future<void> startRecording() async {
+Future<void> startRecording() async {
+  if (recordingCount < 5) {
     try {
       if (await audioRecord.hasPermission()) {
         await audioRecord.start();
@@ -46,7 +51,10 @@ class _RecordingScreenState extends State<RecordingScreen> {
       print('Error Start Recording::::::: $e');
       print('Stack Trace:::::::>>>>>>> $stackTrace');
     }
+  } else {
+    // showRecordingLimitAlert(context);
   }
+}
 
   Future<void> stopRecording() async {
   try {
@@ -64,6 +72,11 @@ class _RecordingScreenState extends State<RecordingScreen> {
       isRecording = false;
       audioPath = newPath;
       voiceRecordingsBox.add(audioPath);
+      recordingCount++;
+       if(recordingCount == 5){
+          showRecordingLimitAlert(context);
+       }
+     
     });
   } catch (e) {
     print('Error stop Recording $e');
@@ -130,13 +143,47 @@ class _RecordingScreenState extends State<RecordingScreen> {
               ),
             );
           })
+             
           : const Center(child: Text(" Empty Data")),
-      floatingActionButton: ElevatedButton(
+              floatingActionButton: recordingCount < 5
+    ? ElevatedButton(
         onPressed: isRecording ? stopRecording : startRecording,
         child: isRecording
             ? const Text("Stop Recording")
             : const Text("Start Recording"),
+      ): const SizedBox(
+        
       ),
+    
     );
   }
+
+
+
+void showRecordingLimitAlert(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Recording Limit Reached'),
+        content: Text('You have reached the maximum recording limit (5 recordings).'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => NavigationScreen()),
+              );
+            },
+            child: Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
 }
+
+
+
+}
+  

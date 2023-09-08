@@ -100,7 +100,7 @@ class Dashboard extends StatelessWidget {
                                                   NavigationScreen())); //Recording //PatientDetails
                                     },
                                     child: const Text(
-                                      "Search Patient Details",
+                                      "Record",
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                           color: Colors.white,
@@ -119,7 +119,7 @@ class Dashboard extends StatelessWidget {
                       width: 190.0,
                       height: 190.0,
                       child: Card(
-                        color: Color.fromARGB(255, 32, 101, 157),
+                        color: Color.fromARGB(255, 64, 112, 151),
                         elevation: 2.0,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0)),

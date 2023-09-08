@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
+import 'package:voice_recording_app/RecordingScreen/recordnav.dart';
+import 'package:voice_recording_app/dashboard.dart';
 
 class recordingu extends StatefulWidget {
   const recordingu({super.key});
@@ -19,6 +21,7 @@ class _recordinguState extends State<recordingu> {
   late AudioPlayer audioPlayer;
   bool isRecording = false;
   String audioPath = " ";
+   int recordingCount = 0;
 
   @override
   void initState() {
@@ -45,73 +48,25 @@ class _recordinguState extends State<recordingu> {
   }
 
 
-  Future<void> startRecording() async {
-  try {
-    if (await audioRecord.hasPermission()) {
-      final appSupportDirPath = await getApplicationSupportDirectoryPath();
-      if (appSupportDirPath != null) {
-        // Create a new folder for recordings
-        final recordingsDirPath = '$appSupportDirPath/recordings';
-        final customPath = '$recordingsDirPath/custom_audio_file.wav';
-
-        // Check if the recordings directory exists, if not, create it
-        final recordingsDir = Directory(recordingsDirPath);
-        if (!await recordingsDir.exists()) {
-          await recordingsDir.create(recursive: true);
-        }
-
-        await audioRecord.start(path: customPath);
+Future<void> startRecording() async {
+  if (recordingCount < 5) {
+    try {
+      if (await audioRecord.hasPermission()) {
+        await audioRecord.start();
         setState(() {
           isRecording = true;
-          audioPath = customPath;
         });
-      } else {
-        print('Error: Application support directory path is null.');
       }
+    } catch (e, stackTrace) {
+      print('Error Start Recording::::::: $e');
+      print('Stack Trace:::::::>>>>>>> $stackTrace');
     }
-  } catch (e, stackTrace) {
-    print('Error Start Recording::::::: $e');
-    print('Stack Trace:::::::>>>>>>> $stackTrace');
+  } else {
+    // showRecordingLimitAlert(context);
   }
 }
 
 
-
-// Future<void> startRecording() async {
-//     try {
-//       if (await audioRecord.hasPermission()) {
-//         final appSupportDirPath = await getApplicationSupportDirectoryPath();
-//         if (appSupportDirPath != null) {
-//           final customPath = '$appSupportDirPath/custom_audio_file.wav'; // Change the file name and extension as needed
-//           await audioRecord.start(path: customPath);
-//           setState(() {
-//             isRecording = true;
-//             audioPath = customPath;
-//           });
-//         } else {
-//           print('Error: Application support directory path is null.');
-//         }
-//       }
-//     } catch (e, stackTrace) {
-//       print('Error Start Recording::::::: $e');
-//       print('Stack Trace:::::::>>>>>>> $stackTrace');
-//     }
-//   }
-
-
-  // Future<void> startRecording() async {
-  //   try {
-  //     if (await audioRecord.hasPermission()) {
-  //       await audioRecord.start();
-  //       setState(() {
-  //         isRecording = true;
-  //       });
-  //     }
-  //   } catch (e, stackTrace) {
-  //     print('Error Start Recording::::::: $e');
-  //     print('Stack Trace:::::::>>>>>>> $stackTrace');
-  //   }
-  // }
 
 
  Future<void> stopRecording() async {
@@ -130,21 +85,17 @@ class _recordinguState extends State<recordingu> {
       isRecording = false;
       audioPath = newPath;
       voiceRecordingsBox.add(audioPath);
+         recordingCount++;
+        if(recordingCount == 5){
+          showRecordingLimitAlert(context);
+       }
+     
     });
   } catch (e) {
     print('Error stop Recording $e');
   }
 }
 
-  // Future<void> playRecording({required String  audioPath1}) async {
-  //   try {
-  //     Source urlSource = UrlSource(audioPath1);
-  //     await audioPlayer.play(urlSource);
-  //     //print('Hive Playing Recording ${voiceRecordingsBox.values.cast<String>().toList().toString()}');
-  //   } catch (e) {
-  //     print('Error Playing Recording $e');
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -207,12 +158,40 @@ class _recordinguState extends State<recordingu> {
             );
           })
           : const Center(child: Text(" Empty Data")),
-      floatingActionButton: ElevatedButton(
+        floatingActionButton: recordingCount < 5
+    ? ElevatedButton(
         onPressed: isRecording ? stopRecording : startRecording,
         child: isRecording
             ? const Text("Stop Recording")
             : const Text("Start Recording"),
+      ): const SizedBox(
+        
       ),
     );
   }
+
+void showRecordingLimitAlert(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Recording Limit Reached'),
+        content: Text('You have reached the maximum recording limit (5 recordings).'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (context) => NavigationScreen()),
+              );
+            },
+            child: Text('OK'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+
 }

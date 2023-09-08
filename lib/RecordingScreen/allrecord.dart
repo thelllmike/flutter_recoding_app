@@ -1,29 +1,26 @@
+
 import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:voice_recording_app/RecordingScreen/recordnav.dart';
-import 'package:voice_recording_app/dashboard.dart';
 
-
-class recordingi extends StatefulWidget {
-  // const recordingi({super.key});
+class Recordingallscreen extends StatefulWidget {
+  const Recordingallscreen({super.key});
 
   @override
-  State<recordingi> createState() => _recordingiState();
+  _RecordingScreenState createState() => _RecordingScreenState();
 }
 
-class _recordingiState extends State<recordingi> {
-final voiceRecordingsBox = Hive.box('voiceRecordingsBox');
+class _RecordingScreenState extends State<Recordingallscreen> {
+  final voiceRecordingsBox = Hive.box('voiceRecordingsBox');
   late Record audioRecord;
   late AudioPlayer audioPlayer;
   bool isRecording = false;
   String audioPath = " ";
-  int recordingCount = 0;
 
- @override
+  @override
   void initState() {
     super.initState();
     audioPlayer = AudioPlayer();
@@ -37,8 +34,7 @@ final voiceRecordingsBox = Hive.box('voiceRecordingsBox');
     audioPlayer.dispose();
   }
 
-Future<void> startRecording() async {
-  if (recordingCount < 5) {
+  Future<void> startRecording() async {
     try {
       if (await audioRecord.hasPermission()) {
         await audioRecord.start();
@@ -50,42 +46,26 @@ Future<void> startRecording() async {
       print('Error Start Recording::::::: $e');
       print('Stack Trace:::::::>>>>>>> $stackTrace');
     }
-  } else {
-    // showRecordingLimitAlert(context);
   }
-}
 
- Future<void> stopRecording() async {
-  try {
-    String? path = await audioRecord.stop();
-
-    // Save with a name starting with 'audio'
-    final directory = await path_provider.getApplicationDocumentsDirectory();
-    final DateTime now = DateTime.now();
-    final String newFileName = 'audio_${now.toIso8601String()}.aac';
-    final newPath = '${directory.path}/$newFileName';
-
-    File(path!).renameSync(newPath);
-
-    setState(() {
-      isRecording = false;
-      audioPath = newPath;
-      voiceRecordingsBox.add(audioPath);
-        recordingCount++;
-        if(recordingCount == 5){
-          showRecordingLimitAlert(context);
-       }
-    });
-  } catch (e) {
-    print('Error stop Recording $e');
+  Future<void> stopRecording() async {
+    try {
+      String? path = await audioRecord.stop();
+      setState(() {
+        isRecording = false;
+        audioPath = path!;
+        voiceRecordingsBox.add(audioPath);
+      });
+    } catch (e) {
+      print('Error stop Recording $e');
+    }
   }
-}
 
-   @override
- Widget build(BuildContext context) {
-  final voiceRecordings = voiceRecordingsBox.values.cast<String>()
-    .where((path) => path.contains('/audio_')) // Filter paths that contain 'audio_'
-    .toList();
+
+
+  @override
+  Widget build(BuildContext context) {
+    final voiceRecordings = voiceRecordingsBox.values.cast<String>().toList();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Voice Recorder'),
@@ -142,39 +122,12 @@ Future<void> startRecording() async {
             );
           })
           : const Center(child: Text(" Empty Data")),
-           floatingActionButton: recordingCount < 5
-    ? ElevatedButton(
-        onPressed: isRecording ? stopRecording : startRecording,
-        child: isRecording
-            ? const Text("Stop Recording")
-            : const Text("Start Recording"),
-      ): const SizedBox(
-        
-      ),
+      // floatingActionButton: ElevatedButton(
+      //   onPressed: isRecording ? stopRecording : startRecording,
+      //   child: isRecording
+      //       ? const Text("Stop Recording")
+      //       : const Text("Start Recording"),
+      // ),
     );
   }
-
-void showRecordingLimitAlert(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Recording Limit Reached'),
-        content: Text('You have reached the maximum recording limit (5 recordings).'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (context) => NavigationScreen()),
-              );
-            },
-            child: Text('OK'),
-          ),
-        ],
-      );
-    },
-  );
-}
-
 }
